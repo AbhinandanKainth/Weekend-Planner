@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Page not found · Weekend Planner</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #fffaf3; color: #1c1917; display: grid; place-items: center; min-height: 100vh; margin: 0; text-align: center; padding: 1rem; }
+    a { display: inline-block; margin-top: 1rem; background: #c2410c; color: #fff; padding: .75rem 1.25rem; border-radius: 999px; text-decoration: none; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <main>
+    <p style="font-size:3rem;margin:0">🧭</p>
+    <h1>We couldn't find that page</h1>
+    <p>Taking you to Weekend Planner… / आपको होम पेज पर ले जा रहे हैं…</p>
+    <a href="./">Go home</a>
+  </main>
+  <script>
+    // On project sites, send users to the app root regardless of depth.
+    var base = location.pathname.split('/').slice(0, 2).join('/') + '/';
+    document.querySelector('a').href = base;
+    setTimeout(function () { location.replace(base); }, 1500);
+  </script>
+</body>
+</html>

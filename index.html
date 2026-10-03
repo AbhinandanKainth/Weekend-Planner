@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Weekend Planner: Hyderabad, Bengaluru, Mumbai, Delhi NCR, Pune</title>
+  <meta name="description" content="Plan your Saturday and Sunday in 2 minutes. Ready-made weekend plans and budget-friendly ideas for friends, couples, families and parents in Hyderabad, Bengaluru, Mumbai, Delhi NCR and Pune.">
+  <meta name="theme-color" content="#c2410c" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f1115" media="(prefers-color-scheme: dark)">
+  <meta property="og:title" content="Weekend Planner">
+  <meta property="og:description" content="Plan your weekend in 2 minutes. Free and budget ideas, date nights, family days, plans for parents.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://abhinandankainth.github.io/Weekend-Planner/icons/og.png">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script>
+    // Apply saved theme and text size before first paint to avoid a flash.
+    (function () {
+      try {
+        var s = JSON.parse(localStorage.getItem('wp:v1') || '{}');
+        var d = document.documentElement;
+        if (s.theme && s.theme !== 'auto') d.setAttribute('data-theme', s.theme);
+        if (s.textSize) d.setAttribute('data-text', s.textSize);
+        if (s.lang) d.setAttribute('lang', s.lang);
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#/" data-i18n-aria="goHome" aria-label="Go home">
+        <span class="brand-mark" aria-hidden="true">☀️</span>
+        <span class="brand-name" data-i18n="appName">Weekend Planner</span>
+      </a>
+      <div class="topbar-actions">
+        <label class="visually-hidden" for="city-select" data-i18n="chooseCity">Choose city</label>
+        <select id="city-select" class="city-select"></select>
+        <button class="icon-btn" id="settings-btn" aria-haspopup="dialog" aria-controls="settings-dialog" data-i18n-aria="settings" aria-label="Settings">
+          <span aria-hidden="true">Aa</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div id="offline-banner" class="banner" hidden role="status" data-i18n="offline">You're offline. Showing saved info; maps and links need internet.</div>
+
+  <main id="main" tabindex="-1"></main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <section aria-labelledby="help-h">
+        <h2 id="help-h" class="footer-h" data-i18n="emergencyTitle">Emergency and help (free, 24x7)</h2>
+        <ul class="helplines">
+          <li><a href="tel:112"><strong>112</strong> <span data-i18n="h112">All emergencies</span></a></li>
+          <li><a href="tel:108"><strong>108</strong> <span data-i18n="h108">Ambulance</span></a></li>
+          <li><a href="tel:1091"><strong>1091</strong> <span data-i18n="h1091">Women helpline</span></a></li>
+          <li><a href="tel:1098"><strong>1098</strong> <span data-i18n="h1098">Child helpline</span></a></li>
+          <li><a href="tel:1930"><strong>1930</strong> <span data-i18n="h1930">Cyber fraud</span></a></li>
+          <li><a href="tel:1363"><strong>1363</strong> <span data-i18n="h1363">Tourist helpline</span></a></li>
+        </ul>
+      </section>
+      <section aria-labelledby="trust-h">
+        <h2 id="trust-h" class="footer-h" data-i18n="trustTitle">Our promise</h2>
+        <ul class="promise">
+          <li data-i18n="p1">No login. No ads. No tracking.</li>
+          <li data-i18n="p2">Your plans are saved only on this device.</li>
+          <li data-i18n="p3">We never ask for payment. Book only on official sites or at the counter.</li>
+          <li data-i18n="p4">Prices and timings are approximate (checked Oct 2026). Please confirm before you go.</li>
+        </ul>
+      </section>
+      <p class="footer-small">
+        <a href="https://github.com/AbhinandanKainth/Weekend-Planner/issues/new" target="_blank" rel="noopener" data-i18n="feedback">Spotted a mistake? Tell us</a>
+        · <button class="linklike" id="shortcuts-btn" data-i18n="shortcuts">Keyboard shortcuts</button>
+      </p>
+    </div>
+  </footer>
+
+  <dialog id="settings-dialog" class="dialog" aria-labelledby="settings-title">
+    <form method="dialog" class="dialog-body">
+      <h2 id="settings-title" data-i18n="settings">Settings</h2>
+      <fieldset class="seg">
+        <legend data-i18n="language">Language</legend>
+        <label><input type="radio" name="lang" value="en"> English</label>
+        <label><input type="radio" name="lang" value="hi"> हिंदी</label>
+      </fieldset>
+      <fieldset class="seg">
+        <legend data-i18n="textSize">Text size</legend>
+        <label><input type="radio" name="textSize" value="m"> <span style="font-size:1rem">A</span></label>
+        <label><input type="radio" name="textSize" value="l"> <span style="font-size:1.2rem">A</span></label>
+        <label><input type="radio" name="textSize" value="xl"> <span style="font-size:1.4rem">A</span></label>
+      </fieldset>
+      <fieldset class="seg">
+        <legend data-i18n="theme">Theme</legend>
+        <label><input type="radio" name="theme" value="auto"> <span data-i18n="auto">Auto</span></label>
+        <label><input type="radio" name="theme" value="light"> <span data-i18n="light">Light</span></label>
+        <label><input type="radio" name="theme" value="dark"> <span data-i18n="dark">Dark</span></label>
+      </fieldset>
+      <div class="dialog-actions">
+        <button class="btn btn-primary" value="close" data-i18n="done">Done</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="shortcuts-dialog" class="dialog" aria-labelledby="shortcuts-title">
+    <form method="dialog" class="dialog-body">
+      <h2 id="shortcuts-title" data-i18n="shortcuts">Keyboard shortcuts</h2>
+      <dl class="kbd-list">
+        <dt><kbd>/</kbd></dt><dd data-i18n="kSearch">Search activities</dd>
+        <dt><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></dt><dd data-i18n="kTabs">Plans, Explore, My weekend</dd>
+        <dt><kbd>s</kbd></dt><dd data-i18n="kSurprise">Surprise me</dd>
+        <dt><kbd>c</kbd></dt><dd data-i18n="kCity">Change city</dd>
+        <dt><kbd>d</kbd></dt><dd data-i18n="kDark">Toggle dark mode</dd>
+        <dt><kbd>?</kbd></dt><dd data-i18n="kHelp">Show this help</dd>
+      </dl>
+      <div class="dialog-actions">
+        <button class="btn btn-primary" value="close" data-i18n="done">Done</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <noscript><p class="noscript">Weekend Planner needs JavaScript to build your plan. Please enable it.</p></noscript>
+
+  <script src="assets/i18n.js" defer></script>
+  <script src="data/cities.js" defer></script>
+  <script src="assets/app.js" defer></script>
+</body>
+</html>

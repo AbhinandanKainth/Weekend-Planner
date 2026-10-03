@@ -1,0 +1,53 @@
+name: Validate and deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Validate city data
+        run: node scripts/validate-data.js
+
+      - name: Check JavaScript syntax
+        run: for f in assets/*.js data/*.js sw.js; do node --check "$f"; done
+
+      - name: Assemble site
+        run: |
+          mkdir -p _site
+          cp -R index.html 404.html manifest.webmanifest sw.js robots.txt assets data icons _site/
+          touch _site/.nojekyll
+          # Give each deploy its own offline cache version
+          sed -i "s/__BUILD__/${GITHUB_SHA::8}/" _site/sw.js
+
+      - name: Upload artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
