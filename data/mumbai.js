@@ -453,7 +453,7 @@ WP.registerCity({
       nameHi: "एंटीसोशल लोअर परेल",
       area: "Lower Parel",
       category: "nightlife",
-      description: "A popular gig and events venue for indie music, comedy, DJ nights and community pop-ups. It suits Karthik-style weekend nights with friends.",
+      description: "A popular gig and events venue for indie music, comedy, DJ nights and community pop-ups. It suits easy weekend nights out with friends.",
       cost: 1000,
       costNote: "Approx Rs 500-1500 depending on cover charge, gig ticket and food or drinks.",
       duration: 3,
@@ -754,7 +754,7 @@ WP.registerCity({
           day: "sun",
           slots: [
             { time: "08:30", activityId: "mum-sgnp-safari-nature", note: "Get a safari slot first if available." },
-            { time: "11:30", activityId: "mum-kanheri-caves-sgnp", note: "Use the park bus or cycle only if weather is pleasant." },
+            { time: "12:30", activityId: "mum-kanheri-caves-sgnp", note: "Use the park bus or cycle only if weather is pleasant." },
             { time: "18:30", activityId: "mum-doolally-khar-taproom", note: "End with a relaxed taproom evening instead of another crowded club." }
           ]
         }
@@ -827,10 +827,10 @@ WP.registerCity({
         {
           day: "sat",
           slots: [
-            { time: "10:30", activityId: "mum-csmvs-museum", note: "Use lifts and do only a few galleries." },
-            { time: "13:30", activityId: "mum-ngma-kala-ghoda", note: "Keep this as a quiet, short indoor stop." },
+            { time: "10:30", activityId: "mum-csmvs-museum", note: "Use lifts and do only a few galleries, then a seated lunch at a Kala Ghoda cafe nearby." },
+            { time: "14:30", activityId: "mum-ngma-kala-ghoda", note: "Keep this as a quiet, short indoor stop." },
             { time: "16:30", activityId: "mum-ncpa-nariman-point", note: "Choose an early show or matinee with reserved seating." },
-            { time: "19:00", activityId: "mum-marine-drive-chowpatty-evening", note: "Sit on Marine Drive; skip the sandy beach if knees are an issue." }
+            { time: "19:00", activityId: "mum-marine-drive-chowpatty-evening", note: "Sit on Marine Drive; skip the sandy beach if knees are an issue. Have an early dinner nearby." }
           ]
         },
         {

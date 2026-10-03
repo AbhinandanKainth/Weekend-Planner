@@ -750,8 +750,8 @@ WP.registerCity({
           slots: [
             { time: "08:00", activityId: "blr-brahmins-coffee-bar", note: "Start with idli-vada and coffee before the rush." },
             { time: "09:15", activityId: "blr-bull-temple", note: "Quick darshan and Basavanagudi photos." },
-            { time: "16:30", activityId: "blr-lalbagh-botanical-garden", note: "Use the cooler evening window for the lake and Glass House." },
-            { time: "18:45", activityId: "blr-vv-puram-food-street", note: "Share dosas, chaat, jalebi and badam milk." }
+            { time: "16:00", activityId: "blr-lalbagh-botanical-garden", note: "Use the cooler evening window for the lake and Glass House." },
+            { time: "19:00", activityId: "blr-vv-puram-food-street", note: "Share dosas, chaat, jalebi and badam milk." }
           ]
         },
         {
@@ -772,15 +772,14 @@ WP.registerCity({
       for: "solo",
       persona: "karthik",
       budget: 4200,
-      summary: "A high-quality solo weekend with central culture, one classic brewpub and an early trek. It keeps Saturday efficient and leaves Sunday evening flexible.",
+      summary: "A high-quality solo weekend: central culture and an early night on Saturday, a sunrise trek on Sunday, then an easy indoor afternoon and one classic brewpub to close.",
       days: [
         {
           day: "sat",
           slots: [
             { time: "07:30", activityId: "blr-cubbon-park", note: "Easy run or walk before the city heats up." },
             { time: "10:30", activityId: "blr-ngma-bengaluru", note: "Slow art stop with cafe time if you want to read." },
-            { time: "15:30", activityId: "blr-church-street-evening", note: "Browse books and grab coffee near the metro." },
-            { time: "20:00", activityId: "blr-toit-indiranagar", note: "Book ahead or arrive early for a solo bar seat." }
+            { time: "15:30", activityId: "blr-church-street-evening", note: "Browse books, grab an early dinner nearby and sleep early; trek pickups are around 3:30 a.m." }
           ]
         },
         {
@@ -789,7 +788,7 @@ WP.registerCity({
             { time: "03:30", activityId: "blr-skandagiri-sunrise-trek", note: "Carry ID, permit, water and a headlamp." },
             { time: "11:30", activityId: "blr-ctr-malleswaram-breakfast", note: "Reward breakfast after returning to town." },
             { time: "16:00", activityId: "blr-indian-music-experience", note: "Use an indoor, low-effort second half of the day." },
-            { time: "19:30", activityId: "blr-ranga-shankara", note: "Pick a language and show you actually want to watch." }
+            { time: "19:30", activityId: "blr-toit-indiranagar", note: "Optional celebratory pint; arrive early for a solo bar seat, or skip if the trek wore you out." }
           ]
         }
       ]

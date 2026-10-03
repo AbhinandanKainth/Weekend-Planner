@@ -398,7 +398,7 @@ WP.registerCity({
       elderFriendly: false,
       walking: "medium",
       accessibility: "Footpaths and crowds can be difficult; indoor seating depends on the eatery.",
-      tip: "For Ananya-style budget control, split dishes and save dessert for Natural Ice Cream or a kulfi counter.",
+      tip: "To keep it budget-friendly, split dishes and save dessert for Natural Ice Cream or a kulfi counter.",
       transit: "Nearest metro: Garware College or Deccan area by bus/auto.",
       mapsQuery: "Fergusson College Road food Pune"
     },
@@ -524,7 +524,7 @@ WP.registerCity({
       nameHi: "इंडिपेंडेंस ब्रूइंग कंपनी",
       area: "Kalyani Nagar",
       category: "nightlife",
-      description: "A craft beer and gastropub pick with relaxed seating and a young professional crowd. It works well for Karthik-style no-fuss evenings.",
+      description: "A craft beer and gastropub pick with relaxed seating and a young professional crowd. It works well for no-fuss evenings.",
       cost: 1600,
       costNote: "Approx Rs 1200 to Rs 2000 per person with food and drinks.",
       duration: 2.5,
@@ -714,14 +714,14 @@ WP.registerCity({
       for: "friends",
       persona: "ananya",
       budget: 750,
-      summary: "A cheap, photo-friendly weekend with old Pune on Saturday and a monsoon fort morning on Sunday. Keep snacks shared and use metro, buses or autos where possible.",
+      summary: "A cheap, photo-friendly weekend with old Pune on Saturday and an early fort morning on Sunday. Keep snacks shared and use metro, buses or autos where possible.",
       days: [
         {
           day: "sat",
           slots: [
             { time: "08:30", activityId: "pune-pataleshwar-caves", note: "Start with a quiet free stop before the city heats up." },
             { time: "10:00", activityId: "pune-goodluck-cafe", note: "Split bun maska, chai and keema pav if the group eats non-veg." },
-            { time: "12:00", activityId: "pune-shaniwar-wada", note: "Do photos and history before the afternoon crowd peaks." },
+            { time: "12:00", activityId: "pune-shaniwar-wada", note: "Do photos and history before the afternoon crowd peaks, then a cheap thali lunch nearby." },
             { time: "15:30", activityId: "pune-tulshibaug-mandai", note: "Browse, bargain lightly and keep bags zipped." },
             { time: "18:00", activityId: "pune-dagdusheth-ganpati", note: "Quick darshan and old-city lights before heading home." }
           ]
@@ -805,8 +805,8 @@ WP.registerCity({
           day: "sat",
           slots: [
             { time: "10:30", activityId: "pune-pcmc-science-park", note: "Book the planetarium or show slot first." },
-            { time: "15:30", activityId: "pune-phoenix-marketcity", note: "Indoor food, toilets and a rest stop after science." },
-            { time: "18:00", activityId: "pune-fc-road-snacks", note: "If energy remains, keep dinner casual and low-cost." }
+            { time: "15:00", activityId: "pune-phoenix-marketcity", note: "Indoor food, toilets and a rest stop after science." },
+            { time: "18:30", activityId: "pune-fc-road-snacks", note: "If energy remains, keep dinner casual and low-cost." }
           ]
         },
         {

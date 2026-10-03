@@ -72,16 +72,24 @@ for (const meta of registry) {
     const days = (it.days || []).map((d) => d.day);
     if (!days.includes('sat') || !days.includes('sun')) err(I, 'needs sat and sun');
     (it.days || []).forEach((d) => {
-      let prev = -1;
+      let prev = -1, prevEnd = -1;
       (d.slots || []).forEach((s) => {
         if (!ids.has(s.activityId)) err(I, 'unknown activityId ' + s.activityId);
         if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(s.time || '')) err(I, 'bad time ' + s.time);
         const m = parseInt(s.time, 10) * 60 + parseInt(String(s.time).slice(3), 10);
         if (m < prev) warn(I, `slots out of order on ${d.day} at ${s.time}`);
-        prev = m;
+        if (m < prevEnd) warn(I, `${d.day} ${s.time} starts before the previous stop ends`);
+        const act = acts.find((a) => a.id === s.activityId);
+        prev = m; prevEnd = m + Math.round(((act && act.duration) || 0) * 60);
       });
     });
   });
+  // Persona names are internal; they must never reach user-visible copy.
+  const leak = /\b(ananya|karthik|neha|rajesh)\b/i;
+  const visible = (o, keys) => keys.forEach((k) => { if (typeof o[k] === 'string' && leak.test(o[k])) err(`${C}:${o.id || ''}`, `persona name in ${k}`); });
+  acts.forEach((a) => visible(a, ['name', 'description', 'costNote', 'tip', 'transit', 'accessibility', 'timing']));
+  its.forEach((it) => { visible(it, ['title', 'summary']); (it.days || []).forEach((d) => (d.slots || []).forEach((s) => visible(Object.assign({ id: it.id }, s), ['note']))); });
+  visible(city, ['tagline', 'weather', 'gettingAround', 'safety']);
   console.log(`✓ ${C}: ${acts.length} activities, ${its.length} itineraries`);
 }
 

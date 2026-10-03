@@ -97,7 +97,7 @@ img { max-width: 100%; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .btn-accent { color: #06201d; } }
 .btn-ghost { background: transparent; }
 .btn-sm { min-height: 38px; padding: .3rem .75rem; font-size: .9rem; }
-.btn-wa { background: #128c4b; border-color: #128c4b; color: #fff; }
+.btn-wa { background: #0f7a40; border-color: #0f7a40; color: #fff; }
 .btn-row { display: flex; flex-wrap: wrap; gap: .5rem; }
 .linklike { background: none; border: 0; color: var(--primary); font: inherit; text-decoration: underline; cursor: pointer; padding: 0; min-height: 0; }
 
@@ -172,6 +172,11 @@ details.info > summary { cursor: pointer; padding: .75rem 1rem; font-weight: 700
 .badge { font-size: .78rem; padding: .1rem .5rem; border-radius: 999px; background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
 .badge.good { background: var(--accent-soft); border-color: transparent; }
 .badge.warn { background: var(--warn-bg); color: var(--warn-ink); border-color: transparent; }
+.plan-card.best { border-color: var(--primary); border-width: 2px; }
+.best-badge { background: var(--primary); color: var(--primary-ink); border-color: transparent; margin-left: .25rem; }
+.slot-note { margin: 0 0 .35rem; font-size: .9rem; color: var(--muted); }
+.settings-btn { border-radius: 999px; padding: 0 .75rem; white-space: nowrap; }
+@media (max-width: 340px) { .settings-label { display: none; } }
 .dl { display: grid; grid-template-columns: max-content 1fr; gap: .3rem .75rem; margin: .25rem 0 0; font-size: .925rem; }
 .dl dt { font-weight: 700; color: var(--muted); }
 .dl dd { margin: 0; }

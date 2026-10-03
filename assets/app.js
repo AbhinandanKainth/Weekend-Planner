@@ -17,7 +17,7 @@
 
   /* ---------- State ---------- */
   var state = load();
-  var ui = { weekendOffset: 0, filters: defaultFilters(), route: null };
+  var ui = { weekendOffset: initialOffset(), filters: defaultFilters(), route: null, sharedWeekend: null };
 
   function defaults() {
     return { lang: 'en', theme: 'auto', textSize: 'm', city: null, group: 'all', people: 2, plans: {} };
@@ -74,6 +74,12 @@
     var p = hhmm.split(':'); var d = new Date(2026, 0, 1, +p[0], +p[1]);
     return d.toLocaleTimeString(locale(), { hour: 'numeric', minute: '2-digit' });
   }
+  // From Sunday noon onward, 'this weekend' is mostly over, so open on the next one.
+  function initialOffset() { var n = new Date(); return n.getDay() === 0 && n.getHours() >= 12 ? 1 : 0; }
+  function activeWeekend() {
+    return (ui.route && ui.route.view === 'shared' && ui.sharedWeekend) || weekendDates(ui.weekendOffset);
+  }
+  function ymd(d) { return d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0'); }
   function weekendDates(offset) {
     var now = new Date(); now.setHours(12, 0, 0, 0);
     var day = now.getDay();
@@ -112,7 +118,7 @@
     toastEl.innerHTML = '<span>' + esc(msg) + '</span>' + (actionLabel ? '<button type="button">' + esc(actionLabel) + '</button>' : '');
     if (actionLabel) toastEl.querySelector('button').onclick = function () { action(); hideToast(); };
     toastEl.classList.add('show');
-    toastTimer = setTimeout(hideToast, actionLabel ? 6000 : 2800);
+    toastTimer = setTimeout(hideToast, actionLabel ? 10000 : 2800);
   }
   function hideToast() { toastEl.classList.remove('show'); }
 
@@ -167,18 +173,20 @@
     var p = { sat: [], sun: [] };
     it.days.forEach(function (d) {
       var key = d.day === 'sun' ? 'sun' : 'sat';
-      d.slots.forEach(function (s) { p[key].push({ id: s.activityId, time: s.time }); });
+      d.slots.forEach(function (s) { var x = { id: s.activityId, time: s.time }; if (s.note) x.note = s.note; p[key].push(x); });
       sortDay(p[key]);
     });
     return p;
   }
   function isEmpty(p) { return !p || (!(p.sat || []).length && !(p.sun || []).length); }
-  function setPlan(cityId, p) {
+  function applyPlan(cityId, p, doneMsg) {
     var existing = state.plans[cityId];
-    if (!isEmpty(existing) && JSON.stringify(existing) !== JSON.stringify(p) && !window.confirm(t('replaceConfirm'))) return false;
+    var backup = !isEmpty(existing) && JSON.stringify(existing) !== JSON.stringify(p) ? JSON.parse(JSON.stringify(existing)) : null;
     state.plans[cityId] = JSON.parse(JSON.stringify(p));
     save();
-    return true;
+    go('#/' + cityId + '/my');
+    if (backup) toast(t('replacedPlan'), t('undo'), function () { state.plans[cityId] = backup; save(); rerender(); });
+    else toast(doneMsg);
   }
   function planStats(city, p) {
     var map = actMap(city), cost = 0, h = { sat: 0, sun: 0 };
@@ -189,10 +197,10 @@
   }
 
   /* Share encoding (URL-safe): sat items ~ sun items, each "activityId.HHMM", comma separated */
-  function encodePlan(p) {
+  function encodePlan(p, sat) {
     return DAYS.map(function (d) {
       return (p[d] || []).map(function (s) { return s.id + '.' + s.time.replace(':', ''); }).join(',');
-    }).join('~');
+    }).join('~') + (sat ? '~' + ymd(sat) : '');
   }
   function decodePlan(str, city) {
     try {
@@ -204,13 +212,15 @@
         });
         sortDay(p[d]);
       });
-      return { plan: p, partial: !ok };
+      var dm = /^(\d{4})(\d{2})(\d{2})$/.exec(parts[2] || ''), sat = null;
+      if (dm) { sat = new Date(+dm[1], +dm[2] - 1, +dm[3], 12); if (sat.getDay() !== 6) sat = null; }
+      return { plan: p, partial: !ok, sat: sat };
     } catch (e) { return null; }
   }
   function baseUrl() { return location.href.split('#')[0]; }
-  function shareUrl(cityId, p) { return baseUrl() + '#/' + cityId + '/shared/' + encodePlan(p); }
+  function shareUrl(cityId, p) { return baseUrl() + '#/' + cityId + '/shared/' + encodePlan(p, activeWeekend().sat); }
   function shareText(city, p) {
-    var map = actMap(city), w = weekendDates(ui.weekendOffset), lines = [];
+    var map = actMap(city), w = activeWeekend(), lines = [];
     lines.push(t('shareIntro', { city: cityName(city) }) + ' (' + fmtDate(w.sat) + ' – ' + fmtDate(w.sun) + ')');
     DAYS.forEach(function (d) {
       if (!p[d].length) return;
@@ -218,10 +228,11 @@
       p[d].forEach(function (s) {
         var a = map[s.id]; if (!a) return;
         lines.push(fmtTime(s.time) + ' · ' + nameOf(a) + ' (' + a.area + ')' + (a.cost ? ' ~' + inr(a.cost) : ' · ' + t('free')));
+        if (s.note) lines.push('   ↳ ' + s.note);
       });
     });
     var st = planStats(city, p);
-    lines.push('', t('estCost') + ': ~' + inr(st.cost) + ' ' + t('perPerson'));
+    lines.push('', t('estCost') + ': ~' + inr(st.cost) + ' ' + t('perPerson') + ' (' + t('budgetNote') + ')');
     return lines.join('\n');
   }
   function doShare(kind, city, p) {
@@ -258,7 +269,7 @@
     return new Date(utc).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
   }
   function downloadIcs(city, p) {
-    var map = actMap(city), w = weekendDates(ui.weekendOffset), stamp = icsDate(new Date(), '00:00');
+    var map = actMap(city), w = activeWeekend(), stamp = icsDate(new Date(), '00:00');
     var L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Weekend Planner//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH'];
     DAYS.forEach(function (d) {
       p[d].forEach(function (s, i) {
@@ -270,7 +281,7 @@
           'DTEND:' + icsDate(w[d], s.time, Math.round((a.duration || 1) * 60)),
           icsFold('SUMMARY:' + icsEscape(a.name)),
           icsFold('LOCATION:' + icsEscape(a.area + ', ' + city.name)),
-          icsFold('DESCRIPTION:' + icsEscape((a.tip ? a.tip + '\n' : '') + (a.timing ? 'Timing: ' + a.timing + '\n' : '') + mapsUrl(a, city))),
+          icsFold('DESCRIPTION:' + icsEscape((s.note ? s.note + '\n' : '') + (a.tip ? a.tip + '\n' : '') + (a.timing ? 'Timing: ' + a.timing + '\n' : '') + mapsUrl(a, city))),
           'END:VEVENT');
       });
     });
@@ -372,8 +383,10 @@
       '<p class="muted">' + esc(t('loading')) + '</p><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>';
   }
   function renderLoadError(id) {
-    return '<div class="empty" role="alert"><div class="big" aria-hidden="true">📶</div><h1>' + esc(t('loadError')) + '</h1>' +
-      '<button class="btn btn-primary" data-action="retry" data-city="' + esc(id) + '">' + esc(t('retry')) + '</button></div>';
+    var online = navigator.onLine !== false;
+    return '<div class="empty" role="alert"><div class="big" aria-hidden="true">' + (online ? '🛠️' : '📶') + '</div><h1>' + esc(t(online ? 'loadErrorData' : 'loadError')) + '</h1>' +
+      '<div class="btn-row" style="justify-content:center"><button class="btn btn-primary" data-action="retry" data-city="' + esc(id) + '">' + esc(t('retry')) + '</button>' +
+      '<a class="btn" href="#/">' + esc(t('chooseAnother')) + '</a></div></div>';
   }
   function renderNotFound() {
     return '<div class="empty"><div class="big" aria-hidden="true">🧭</div><h1>' + esc(t('notFound')) + '</h1><a class="btn btn-primary" href="#/">' + esc(t('goHome')) + '</a></div>';
@@ -393,6 +406,7 @@
         }).join('') +
         '<span class="weekend-pill">📅 ' + esc(fmtDate(w.sat)) + ' – ' + esc(fmtDate(w.sun)) + '</span>' +
       '</div></div>' +
+      (state.lang === 'hi' ? '<p class="note small">' + esc(t('hiPartial')) + '</p>' : '') +
       '<details class="info"><summary>ℹ️ ' + esc(t('cityInfo')) + '</summary><div class="info-grid">' +
         '<div><h3>🌦️ ' + esc(t('weather')) + '</h3><p>' + esc(city.weather) + '</p></div>' +
         '<div><h3>🚇 ' + esc(t('gettingAround')) + '</h3><p>' + esc(city.gettingAround) + '</p></div>' +
@@ -441,11 +455,12 @@
   function planCard(city, it) {
     var stops = it.days.reduce(function (n, d) { return n + d.slots.length; }, 0);
     var highlight = state.group !== 'all' && it.for === state.group;
-    return '<article class="card plan-card"' + (highlight ? ' style="border-color:var(--primary)"' : '') + '>' +
-      '<div class="for"><span aria-hidden="true">' + (GROUP_EMOJI[it.for] || '') + '</span> ' + esc(t('g_' + it.for)) + '</div>' +
+    return '<article class="card plan-card' + (highlight ? ' best' : '') + '">' +
+      '<div class="for"><span aria-hidden="true">' + (GROUP_EMOJI[it.for] || '') + '</span> ' + esc(t('g_' + it.for)) +
+        (highlight ? ' <span class="badge best-badge">★ ' + esc(t('bestMatch')) + '</span>' : '') + '</div>' +
       '<h3><a href="#/' + city.id + '/plan/' + it.id + '">' + esc(state.lang === 'hi' && it.titleHi ? it.titleHi : it.title) + '</a></h3>' +
       '<p class="desc">' + esc(it.summary) + '</p>' +
-      '<div class="meta"><span>' + price(it.budget) + ' ' + esc(t('perPerson')) + '</span><span>' + stops + ' ' + esc(t('stops')) + '</span></div>' +
+      '<div class="meta"><span>' + price(planStats(city, itineraryToPlan(it)).cost) + ' ' + esc(t('perPerson')) + '</span><span>' + stops + ' ' + esc(t('stops')) + '</span></div>' +
       '<div class="card-actions">' +
         '<a class="btn btn-sm" href="#/' + city.id + '/plan/' + it.id + '">' + esc(t('viewPlan')) + '</a>' +
         '<button class="btn btn-sm btn-primary" data-action="use-plan" data-plan="' + it.id + '">' + esc(t('usePlan')) + '</button>' +
@@ -463,7 +478,7 @@
       '<div class="for" style="color:var(--accent);font-weight:700"><span aria-hidden="true">' + (GROUP_EMOJI[it.for] || '') + '</span> ' + esc(t('g_' + it.for)) + ' · ' + esc(cityName(city)) + '</div>' +
       '<h1>' + esc(state.lang === 'hi' && it.titleHi ? it.titleHi : it.title) + '</h1>' +
       '<p>' + esc(it.summary) + '</p>' +
-      '<div class="summary-bar"><div><div class="k">' + esc(t('budgetWeekend')) + '</div><div class="v">' + price(it.budget) + '</div></div>' +
+      '<div class="summary-bar"><div><div class="k">' + esc(t('budgetWeekend')) + '</div><div class="v">' + price(planStats(city, p).cost) + '</div><div class="small muted">' + esc(t('budgetNote')) + '</div></div>' +
       '<div><div class="k">📅</div><div class="v">' + esc(fmtDate(w.sat)) + ' – ' + esc(fmtDate(w.sun)) + '</div></div></div>' +
       '<div class="btn-row no-print">' +
         '<button class="btn btn-primary" data-action="use-plan" data-plan="' + it.id + '">' + esc(t('usePlan')) + '</button>' +
@@ -616,10 +631,10 @@
     return head +
       '<h2>' + esc(t('myTitle', { city: cityName(city) })) + '</h2>' +
       '<div class="summary-bar">' +
-        '<div><div class="k">' + esc(t('estCost')) + '</div><div class="v">' + price(st.cost) + ' <span class="small muted">' + esc(t('perPerson')) + '</span></div></div>' +
+        '<div><div class="k">' + esc(t('estCost')) + '</div><div class="v">' + price(st.cost) + ' <span class="small muted">' + esc(t('perPerson')) + '</span></div><div class="small muted">' + esc(t('budgetNote')) + '</div></div>' +
         '<div><div class="k" id="ppl-l">' + esc(t('people')) + '</div><div class="stepper" role="group" aria-labelledby="ppl-l">' +
-          '<button data-action="people" data-delta="-1" data-fkey="ppl-" aria-label="−1">−</button><output aria-live="polite">' + state.people + '</output>' +
-          '<button data-action="people" data-delta="1" data-fkey="ppl+" aria-label="+1">+</button></div></div>' +
+          '<button data-action="people" data-delta="-1" data-fkey="ppl-" aria-label="' + esc(t('fewerPeople')) + '">−</button><output aria-live="polite">' + state.people + '</output>' +
+          '<button data-action="people" data-delta="1" data-fkey="ppl+" aria-label="' + esc(t('morePeople')) + '">+</button></div></div>' +
         '<div><div class="k">' + esc(t('estTotal', { n: state.people })) + '</div><div class="v">' + price(st.cost * state.people) + '</div></div>' +
         '<div><div class="k">' + esc(t('estHours')) + '</div><div class="v">' + esc(t('satShort')) + ' ' + esc(hrs(st.hours.sat)) + ' · ' + esc(t('sunShort')) + ' ' + esc(hrs(st.hours.sun)) + '</div></div>' +
       '</div>' +
@@ -637,7 +652,8 @@
               '<input type="time" id="t-' + d + i + '" step="900" value="' + esc(s.time) + '" data-action="time" data-day="' + d + '" data-idx="' + i + '" data-fkey="time-' + d + '-' + esc(s.id) + '">' +
               '<button class="btn btn-sm" data-action="move" data-day="' + d + '" data-idx="' + i + '" data-fkey="mv-' + d + i + '">⇄ ' + esc(t('moveTo', { day: dayLabel(other, true) })) + '</button>' +
               '<button class="btn btn-sm" data-action="remove" data-day="' + d + '" data-idx="' + i + '" data-fkey="rm-' + d + i + '" aria-label="' + esc(t('remove') + ': ' + a.name) + '">✕ ' + esc(t('remove')) + '</button></span>';
-            return '<li><div class="slot-time">' + esc(fmtTime(s.time)) + (overlap ? ' <span class="badge warn">⚠️ ' + esc(t('overlap')) + '</span>' : '') + '</div>' + activityCard(city, a, { compact: true, controls: controls }) + '</li>';
+            return '<li><div class="slot-time">' + esc(fmtTime(s.time)) + (overlap ? ' <span class="badge warn">⚠️ ' + esc(t('overlap')) + '</span>' : '') + '</div>' +
+              (s.note ? '<p class="slot-note">📝 ' + esc(s.note) + '</p>' : '') + activityCard(city, a, { compact: true, controls: controls }) + '</li>';
           }).join('') + '</ol>' : '<p class="muted">—</p>') +
         '</section>';
       }).join('') +
@@ -654,9 +670,21 @@
       return '<div class="empty" role="alert"><div class="big" aria-hidden="true">🔗</div><h1>' + esc(t('sharedBad')) + '</h1><a class="btn btn-primary" href="#/' + city.id + '">' + esc(t('browsePlans')) + '</a></div>';
     }
     sharedCache = res.plan;
-    var p = res.plan, map = actMap(city), w = weekendDates(ui.weekendOffset), st = planStats(city, p);
+    ui.sharedWeekend = null;
+    var dateNote = '';
+    if (res.sat) {
+      var key = ymd(res.sat), match = [0, 1].filter(function (o) { return ymd(weekendDates(o).sat) === key; })[0];
+      if (match != null) ui.weekendOffset = match;
+      else if (res.sat > weekendDates(1).sat) {
+        var sun = new Date(res.sat); sun.setDate(sun.getDate() + 1);
+        ui.sharedWeekend = { sat: res.sat, sun: sun };
+        dateNote = t('sharedDate', { d: fmtDate(res.sat) });
+      } else dateNote = t('sharedPast', { d: fmtDate(res.sat) });
+    }
+    var p = res.plan, map = actMap(city), w = activeWeekend(), st = planStats(city, p);
     return '<h1>' + esc(t('sharedTitle')) + '</h1>' +
       '<p class="muted">' + esc(cityName(city)) + ' · ' + esc(fmtDate(w.sat)) + ' – ' + esc(fmtDate(w.sun)) + '</p>' +
+      (dateNote ? '<p class="note">📅 ' + esc(dateNote) + '</p>' : '') +
       (res.partial ? '<p class="note">' + esc(t('sharedBad')) + '</p>' : '') +
       '<div class="summary-bar"><div><div class="k">' + esc(t('estCost')) + '</div><div class="v">' + price(st.cost) + ' <span class="small muted">' + esc(t('perPerson')) + '</span></div></div></div>' +
       '<div class="btn-row no-print"><button class="btn btn-primary" data-action="save-shared">' + esc(t('sharedSave')) + '</button>' +
@@ -694,7 +722,7 @@
       case 'add': addToDay(city, el.getAttribute('data-act'), el.getAttribute('data-day')); break;
       case 'use-plan': {
         var it = city.itineraries.filter(function (i) { return i.id === el.getAttribute('data-plan'); })[0];
-        if (it && setPlan(city.id, itineraryToPlan(it))) { go('#/' + city.id + '/my'); toast(t('usePlanDone')); }
+        if (it) applyPlan(city.id, itineraryToPlan(it), t('usePlanDone'));
         break;
       }
       case 'share': {
@@ -711,8 +739,10 @@
       case 'people': state.people = Math.max(1, Math.min(20, state.people + (+el.getAttribute('data-delta')))); save(); rerender(); break;
       case 'move': {
         var p = myPlan(city.id), d = el.getAttribute('data-day'), o = d === 'sat' ? 'sun' : 'sat';
-        var item = p[d].splice(+el.getAttribute('data-idx'), 1)[0];
-        if (item && !p[o].some(function (s) { return s.id === item.id; })) { p[o].push(item); sortDay(p[o]); }
+        var mi = +el.getAttribute('data-idx'), cur = p[d][mi];
+        if (!cur) break;
+        if (p[o].some(function (s) { return s.id === cur.id; })) { toast(t('alreadyAdded', { day: dayLabel(o) })); break; }
+        p[o].push(p[d].splice(mi, 1)[0]); sortDay(p[o]);
         save(); rerender(); break;
       }
       case 'remove': {
@@ -732,7 +762,7 @@
         break;
       }
       case 'save-shared':
-        if (sharedCache && setPlan(city.id, sharedCache)) { go('#/' + city.id + '/my'); toast(t('sharedSaved')); }
+        if (sharedCache) applyPlan(city.id, sharedCache, t('sharedSaved'));
         break;
     }
   });

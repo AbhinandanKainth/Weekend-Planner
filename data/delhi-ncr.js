@@ -847,7 +847,7 @@ WP.registerCity({
           day: "sat",
           slots: [
             { time: "09:00", activityId: "del-okhla-bird-sanctuary", note: "Go early in winter only if AQI and fog are acceptable." },
-            { time: "12:30", activityId: "del-dlf-mall-noida", note: "Use the mall for lunch, toilets and a weather-proof break." },
+            { time: "12:00", activityId: "del-dlf-mall-noida", note: "Use the mall for lunch, toilets and a weather-proof break." },
             { time: "15:00", activityId: "del-kidzania-noida", note: "Pre-book a slot so the kids get enough activity time." },
             { time: "19:30", activityId: "del-noida-brahmaputra-theos", note: "Do a quick snack and dessert stop instead of a late heavy dinner." }
           ]
@@ -885,8 +885,7 @@ WP.registerCity({
           day: "sun",
           slots: [
             { time: "10:30", activityId: "del-heritage-transport-museum", note: "Go by car or cab and use the indoor galleries as the main outing." },
-            { time: "16:30", activityId: "del-sunder-nursery", note: "Only do a short, flat stroll if the weather and AQI are comfortable." },
-            { time: "18:30", activityId: "del-india-habitat-centre", note: "Choose an easy exhibition or early dinner, then finish before late traffic." }
+            { time: "16:30", activityId: "del-sunder-nursery", note: "Only do a short, flat stroll if the weather and AQI are comfortable, then head home before late traffic." }
           ]
         }
       ]

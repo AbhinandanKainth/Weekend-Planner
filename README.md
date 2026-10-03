@@ -14,7 +14,7 @@ Weekend Planner is a fast, free, no-login static site. Pick your city and who's 
 | 👯 **Who's coming?** | Friends, Solo, Couple, Family + kids, With parents. Plans and places adapt to your group |
 | 💸 **Budget first** | Free, under ₹300, and under ₹1,000 filters. Every place shows an approximate cost per person, and the planner adds up a total for your group |
 | 🗓️ **My weekend builder** | Add places to Sat or Sun, edit times, move items between days, and undo mistakes. It warns you about overlaps and overpacked days |
-| 📤 **Share & export** | WhatsApp, native share, copy a link (your friend can open and save the plan), calendar (.ics) export, and print |
+| 📤 **Share & export** | WhatsApp, native share, copy a link (it carries the dates, so your friend sees the same weekend and can save the plan), calendar (.ics) export, and print |
 | 🌧️ **Weather-proof** | "Indoor only" filter for rain, heat or smog days. Seasonal places are flagged automatically |
 | 👵 **Inclusive** | English and हिंदी UI, 3 text sizes, low-walking/elder-friendly filter, accessibility notes, and tap-to-call emergency helplines |
 | ⚡ **Light & offline** | No frameworks, no web fonts, works offline as a PWA, and runs well on budget Android phones |
@@ -25,10 +25,10 @@ Weekend Planner is a fast, free, no-login static site. Pick your city and who's 
 
 The design was reviewed against the user personas from the AI-Persona-Maker product team:
 
-- **Ananya (18, student, Pune):** free and budget filters, a ₹750-or-less friends plan per city, a WhatsApp-first share option, and a small download on patchy Wi-Fi.
+- **Ananya (18, student, Pune):** free and budget filters, a budget friends plan in every city (about ₹500–₹1,100 per person for the whole weekend, travel extra), a WhatsApp-first share option, and a small download on patchy Wi-Fi.
 - **Karthik (25, engineer, Bengaluru):** dark mode, keyboard shortcuts, calendar export, and a solo plan with breweries and treks. No sign-up and no dark patterns.
 - **Neha (34, manager, Mumbai):** couple date-weekend plans, a "With parents" plan for hosting in-laws, and a shareable link so she can plan the weekend with her spouse.
-- **Rajesh (40, parent, Noida):** family and elder plans, a low-walking filter, large text, Hindi, clear per-person and group totals, emergency numbers, and a "we never ask for payment" promise.
+- **Rajesh (40, parent, Noida):** family and elder plans, a low-walking filter, large text, Hindi buttons and place names (descriptions are still in English, and the app says so), clear per-person and group totals, emergency numbers, and a "we never ask for payment" promise.
 
 ## Project layout
 
@@ -54,7 +54,7 @@ node scripts/validate-data.js   # check all city data
 
 ## Add or edit places
 
-Each city file calls `WP.registerCity({...})` with `activities` and `itineraries`. Copy an existing entry and keep the same fields: `cost` is an approximate per-person cost in ₹ (use 0 for free), `goodFor` uses `friends|solo|couple|family|elders`, and `months` is optional and only for seasonal places. Then run `node scripts/validate-data.js`. CI blocks a deploy if the data is invalid.
+Each city file calls `WP.registerCity({...})` with `activities` and `itineraries`. Copy an existing entry and keep the same fields: `cost` is an approximate per-person cost in ₹ (use 0 for free), `goodFor` uses `friends|solo|couple|family|elders`, and `months` is optional and only for seasonal places. Then run `node scripts/validate-data.js`. CI blocks a deploy if the data is invalid or if a persona name (Ananya, Karthik, Neha, Rajesh) leaks into user-visible text. The validator also warns when a curated stop starts before the previous one ends.
 
 To add a new city, add it to `data/cities.js`, create `data/<id>.js`, and add the file to the `SHELL` list in `sw.js`.
 
